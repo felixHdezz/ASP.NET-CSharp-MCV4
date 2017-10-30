@@ -1,0 +1,114 @@
+﻿@model pry_prueb95.Models.payments
+@{
+    ViewBag.Title = "Register payments";
+}
+<html>
+    <head>
+        <title>Index | test</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    </head>
+    <body>
+        <br /><br />
+        <div class="container">
+            <form class="form">
+                <div class="form-group">
+                    <label>Factura:</label>
+                    <select class="select form-control" name="idFac" id="idFac"></select>
+                </div>
+                <div class="form-group">
+                    <label>Pago:</label>
+                    <input class="form-control" type="text" name="txt_cot" id="txt_cost"/>
+                </div>
+                <input type="button" class="btn btn-success" value="Guardar" id="btn_addUser" />
+            </form>
+        </div>
+        <div class="container">
+            <table class="table" id="tblPayment">
+                <thead>
+                    <tr>
+                        <td>Id pago</td>
+                        <td>Factura</td>
+                        <td>Total costo</td>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <br />
+        <div class="container">
+            <input type="button" class="btn btn-success" value="Status" id="btn_status" />
+            <table class="table" id="tbl_statusPayments">
+                <thead>
+                    <tr>
+                        <td>Id Factura</td>
+                        <td>Factura</td>
+                        <td>Total pagos</td>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+        <script type="text/javascript" src="http://ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js"></script>
+        <script>
+            $(document).ready(function () {
+                getfact();
+                function getfact() {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Home/DropSalect",
+                        data: '{}',
+                        success: function (data) {
+                            var ddlCustomers = $("[id*=idFac]");
+                            ddlCustomers.empty().append('<option selected="selected" value="0">--- Selecciona ---</option>');
+                            for (var index = 0; index < data.length; index++) {
+                                ddlCustomers.append('<option value="'+data[index].Value+'">' + data[index].Text+ '</option>');
+                            }
+                        }
+                    });
+                }
+                $("#btn_addUser").click(function () {
+                    var cmFact = document.getElementById("idFac");
+                    var idFac = cmFact.options[cmFact.selectedIndex].value;
+                    var cost = $("#txt_cost").val();
+                    $.ajax({
+                        type: "POST",
+                        url: "/Home/addUser",
+                        data: {_idFac:idFac,_totalCost:cost},
+                        success: function (data) {
+                            $("#tblPayment tbody > tr").remove();
+                            var tds = "";
+                            for (var index = 0; index < data.length; index++) {
+                                tds += "<tr>";
+                                tds += "<td>" + data[index]._idPayment + "</td><td>" + data[index]._nameFac + "</td><td>" + data[index]._totalCost + "</td>";
+                                tds += "</tr>";
+                            }
+                            $("#tblPayment tbody").append(tds);
+                            $("#txt_cost").value(" ");
+                        }
+                    });
+                });
+                $("#btn_status").click(function () {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Home/statusPayments",
+                        data: {},
+                        success: function (data) {
+                            $("#tbl_statusPayments tbody > tr").remove();
+                            var tds = "";
+                            for (var index = 0; index < data.length; index++) {
+                                tds += "<tr>";
+                                tds += "<td>" + data[index]._idFac + "</td><td>" + data[index]._nameFac + "</td><td>" +  data[index]._totalCost + "</td>";
+                                tds += "</tr>";
+                            }
+                            $("#tbl_statusPayments tbody").append(tds);
+                        }
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>
